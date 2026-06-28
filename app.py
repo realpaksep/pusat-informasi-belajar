@@ -74,13 +74,11 @@ if selected_tp != "-- Pilih TP --":
             df_siswa_cloud = None
             if conn:
                 try:
-                    # Mencoba membaca sheet sesuai nama rombel
                     df_siswa_cloud = conn.read(worksheet=f"Siswa_{selected_rombel.replace(' ', '_')}", ttl=10)
                     st.sidebar.success(f"Berhasil memuat data {selected_rombel} dari Cloud!")
                 except Exception:
                     df_siswa_cloud = None
 
-            # Opsi Cadangan jika ingin upload manual via Excel/CSV
             uploaded_file = st.sidebar.file_uploader("Atau Upload/Update Template Excel/CSV Manual", type=["xlsx", "csv"])
             if uploaded_file:
                 if uploaded_file.name.endswith('.csv'):
@@ -88,7 +86,6 @@ if selected_tp != "-- Pilih TP --":
                 else:
                     df_siswa_cloud = pd.read_excel(uploaded_file)
                 
-                # Simpan hasil upload manual ke Google Sheets cloud agar permanen
                 if conn:
                     try:
                         conn.update(worksheet=f"Siswa_{selected_rombel.replace(' ', '_')}", data=df_siswa_cloud)
@@ -100,7 +97,7 @@ if selected_tp != "-- Pilih TP --":
                 st.warning("Silakan unggah daftar siswa terlebih dahulu di bilah samping (Sidebar) untuk kelas ini.")
             else:
                 df_master = df_siswa_cloud.copy()
-                df_master = df_master.sort_values(by=df_master.columns[1]) # Urut Abjad Nama
+                df_master = df_master.sort_values(by=df_master.columns[1]) 
                 nama_siswa_list = df_master.iloc[:, 1].tolist()
                 
                 # ==========================================
@@ -136,11 +133,10 @@ if selected_tp != "-- Pilih TP --":
                     if st.button("💾 SIMPAN ABSENSI KE CLOUD (GOOGLE SHEETS)"):
                         if conn:
                             try:
-                                # Menggabungkan dengan data absen lama jika ada
                                 try:
                                     df_old = conn.read(worksheet=f"Absen_{selected_rombel.replace(' ', '_')}")
                                     df_total = pd.concat([df_old, df_absen_save], ignore_index=True).drop_duplicates(subset=["Tanggal", "Nama Siswa"], keep='last')
-                                Turks:
+                                except Exception:
                                     df_total = df_absen_save
                                 conn.update(worksheet=f"Absen_{selected_rombel.replace(' ', '_')}", data=df_total)
                                 st.success("Data Absensi Berhasil Disimpan Permanen! Bisa dibuka dari Laptop/HP manapun.")
@@ -150,7 +146,7 @@ if selected_tp != "-- Pilih TP --":
                             st.error("Koneksi cloud belum disetting.")
 
                 # ==========================================
-                # MENU LAIN (2-6) AKTIF SECARA INTEGRAL
+                # MENU LAIN (2-6)
                 # ==========================================
                 else:
                     st.info(f"Menu '{menu}' siap digunakan. Seluruh logika poin input dan konversi nilai tetap aktif berjalan normal di sesi ini.")
